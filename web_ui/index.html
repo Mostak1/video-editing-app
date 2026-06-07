@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Video Agent - Dashboard</title>
+    <title>Smart Video Agent - Setup & Dashboard</title>
     <!-- Modern Premium Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,16 +45,45 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 24px;
         }
 
-        /* Container Layout */
-        .dashboard-container {
+        /* View States */
+        .view-state {
             width: 100%;
             max-width: 1200px;
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 24px;
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Spinner & Loading */
+        #loadingView {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Header block */
@@ -104,7 +133,6 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            position: relative;
         }
 
         .status-dot.connected {
@@ -131,27 +159,200 @@
             100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* Disconnection Alert Box */
-        .alert-box {
-            display: none;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 12px;
-            padding: 16px 20px;
-            color: #fca5a5;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .alert-box code {
-            background: rgba(0,0,0,0.4);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            color: #fff;
+        /* Setup Wizard Styles */
+        .wizard-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            max-width: 750px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
-        /* Two-Column Workspace */
+        .wizard-header {
+            text-align: center;
+        }
+
+        .wizard-header h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .wizard-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        /* Step List */
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .step-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px 24px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .step-badge {
+            background: var(--accent-primary);
+            color: white;
+            font-weight: 800;
+            font-size: 13px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px var(--accent-primary-glow);
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .step-content p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .step-content code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 255, 255, 0.06);
+            color: #a5b4fc;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Checklist */
+        .checklist-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .checklist-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .checklist-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .checklist-row:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .checklist-status {
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pill.pass {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .status-pill.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        /* Buttons */
+        .btn-large {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px var(--accent-primary-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-large:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-large:active {
+            transform: translateY(1px);
+        }
+
+        .wizard-error-desc {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            line-height: 1.5;
+        }
+
+        /* Dashboard specific workspace styles */
         .workspace {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -241,11 +442,6 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        .btn-browse:active {
-            transform: scale(0.97);
-        }
-
-        /* Select styling */
         select.path-input {
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -256,7 +452,6 @@
             font-family: inherit;
         }
 
-        /* Checkbox styling */
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -264,7 +459,6 @@
             cursor: pointer;
             user-select: none;
             font-size: 14px;
-            color: var(--text-main);
             margin-top: 5px;
         }
 
@@ -281,7 +475,6 @@
             align-items: center;
             justify-content: center;
             background: rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
         }
 
         .checkbox-container input:checked + .custom-checkbox {
@@ -305,7 +498,6 @@
             opacity: 1;
         }
 
-        /* Action Buttons */
         .actions-block {
             display: flex;
             gap: 12px;
@@ -342,7 +534,6 @@
             background: #4b5563;
             box-shadow: none;
             cursor: not-allowed;
-            transform: none;
             opacity: 0.6;
         }
 
@@ -361,7 +552,6 @@
             cursor: not-allowed;
         }
 
-        /* Status & Log Panel */
         .progress-section {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 14px;
@@ -385,7 +575,6 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 9999px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .progress-bar-fill {
@@ -396,7 +585,6 @@
             transition: width 0.3s ease;
         }
 
-        /* Terminal Window */
         .terminal-box {
             flex: 1;
             background: var(--terminal-bg);
@@ -434,77 +622,111 @@
         .terminal-dot.y { background: #f59e0b; }
         .terminal-dot.g { background: #10b981; }
 
-        .terminal-title {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
         .terminal-output {
             flex: 1;
             overflow-y: auto;
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12.5px;
             color: #d1d5db;
             line-height: 1.6;
             white-space: pre-wrap;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.1) transparent;
         }
 
-        /* Custom Scrollbar for Terminal */
-        .terminal-output::-webkit-scrollbar {
-            width: 6px;
-        }
-        .terminal-output::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .terminal-output::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 9999px;
-        }
-        .terminal-output::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .log-error {
-            color: #f87171;
-            font-weight: 500;
-        }
-        .log-success {
-            color: #34d399;
-            font-weight: 500;
-        }
-        .log-info {
-            color: #60a5fa;
-        }
+        .log-error { color: #f87171; font-weight: 500; }
+        .log-success { color: #34d399; font-weight: 500; }
+        .log-info { color: #60a5fa; }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        
+    <!-- 1. LOADING VIEW (Checks on page load) -->
+    <div id="loadingView">
+        <div class="spinner"></div>
+        <p style="font-size: 15px; font-weight: 500; color: var(--text-muted);">Checking local setup status...</p>
+    </div>
+
+    <!-- 2. SETUP WIZARD VIEW -->
+    <div id="setupWizard" class="view-state">
+        <div class="wizard-card">
+            
+            <div class="wizard-header">
+                <h2>Local Agent Setup Wizard</h2>
+                <p>Welcome! Follow these simple steps to prepare your local machine for video editing.</p>
+            </div>
+
+            <!-- Steps Instructions -->
+            <div class="step-container">
+                <div class="step-item">
+                    <div class="step-badge">1</div>
+                    <div class="step-content">
+                        <h3>Install Python & FFmpeg</h3>
+                        <p>
+                            Download and install <a href="https://www.python.org/downloads/" target="_blank" style="color:var(--accent-primary);">Python 3.9+</a> (remember to check "Add Python to PATH"). <br>
+                            Install <a href="https://ffmpeg.org/download.html" target="_blank" style="color:var(--accent-primary);">FFmpeg</a> and verify it is added to your environment <code>PATH</code> variable.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-badge">2</div>
+                    <div class="step-content">
+                        <h3>Run the Local Agent</h3>
+                        <p>
+                            Open your project directory on your PC and run: <br>
+                            <code>pip install -r requirements.txt</code><br>
+                            <code>python local_agent.py</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Verification Checklist -->
+            <div class="checklist-panel">
+                <div class="checklist-title">Verification Checklist</div>
+                
+                <div class="checklist-row">
+                    <span class="checklist-label">Local Agent Server (port 8765)</span>
+                    <span id="chkAgent" class="status-pill fail">Checking...</span>
+                </div>
+
+                <div class="checklist-row">
+                    <span class="checklist-label">FFmpeg Installation</span>
+                    <span id="chkFfmpeg" class="status-pill fail">Checking...</span>
+                </div>
+
+                <div class="checklist-row">
+                    <span class="checklist-label">FFprobe Installation</span>
+                    <span id="chkFfprobe" class="status-pill fail">Checking...</span>
+                </div>
+            </div>
+
+            <!-- Error description wrapper -->
+            <div id="wizardErrorMsg" class="wizard-error-desc" style="display:none;"></div>
+
+            <!-- Action Button -->
+            <button id="verifyBtn" class="btn-large" onclick="performVerification()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Verify & Start Editing
+            </button>
+
+        </div>
+    </div>
+
+    <!-- 3. MAIN EDITING DASHBOARD VIEW -->
+    <div id="editDashboard" class="view-state">
         <!-- Header -->
         <header>
             <div class="header-title-section">
                 <h1>Smart Video Clip Agent</h1>
-                <p>Cloud Console • Connected to Local Engine</p>
+                <p>System Online • Local Processing Mode</p>
             </div>
             <div class="status-badge">
-                <div id="statusDot" class="status-dot disconnected"></div>
-                <span id="statusText">Agent Offline</span>
+                <div id="statusDot" class="status-dot connected"></div>
+                <span id="statusText">Agent Online</span>
             </div>
         </header>
 
-        <!-- Offline Alert Box -->
-        <div id="offlineAlert" class="alert-box">
-            ⚠️ <strong>Local Agent Disconnected:</strong> Could not connect to the local processing server on <code>http://127.0.0.1:8765</code>. 
-            Make sure you have started the local Python agent by running: <br>
-            <code style="display:inline-block; margin-top:8px;">python local_agent.py</code>
-        </div>
-
-        <!-- Main Workspace -->
+        <!-- Two-Column Workspace -->
         <div class="workspace">
             
             <!-- Left Panel: Inputs and Configurations -->
@@ -568,7 +790,7 @@
 
                 <!-- Actions -->
                 <div class="actions-block">
-                    <button id="startBtn" class="btn-action btn-start" onclick="startRenderJob()" disabled>
+                    <button id="startBtn" class="btn-action btn-start" onclick="startRenderJob()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         Start Render
                     </button>
@@ -609,7 +831,6 @@
             </div>
 
         </div>
-
     </div>
 
     <script>
@@ -618,16 +839,18 @@
         let isJobRunning = false;
         let logOffset = 0;
         let pollInterval = null;
-        let connectionPollInterval = null;
+        let healthTimer = null;
 
-        // Start Connection Checks
         window.addEventListener('DOMContentLoaded', () => {
-            checkConnection();
-            connectionPollInterval = setInterval(checkConnection, 2500);
+            // Initial auto-verification check
+            autoVerify();
+            
+            // Continously monitor health in the background every 3 seconds to auto-transition or alert
+            healthTimer = setInterval(autoVerify, 3000);
             toggleModeGroup();
         });
 
-        // Toggle visibility of CSV picker based on mode
+        // Toggle CSV Picker UI
         function toggleModeGroup() {
             const mode = document.getElementById('workMode').value;
             const csvGroup = document.getElementById('csvGroup');
@@ -638,53 +861,124 @@
             }
         }
 
-        // Connection Check
-        async function checkConnection() {
+        // Screen transitioning
+        function showView(viewId) {
+            document.getElementById('loadingView').style.display = 'none';
+            document.getElementById('setupWizard').style.display = 'none';
+            document.getElementById('editDashboard').style.display = 'none';
+            
+            const view = document.getElementById(viewId);
+            view.style.display = viewId === 'editDashboard' ? 'flex' : 'flex';
+        }
+
+        // Auto Verification (Runs quietly in background)
+        async function autoVerify() {
             try {
-                const response = await fetch(`${AGENT_URL}/health`, { method: 'GET' });
+                const response = await fetch(`${AGENT_URL}/health`);
                 if (response.ok) {
                     const data = await response.json();
-                    setConnected(true);
+                    if (data.status === 'ok' && data.ffmpeg && data.ffprobe) {
+                        isConnected = true;
+                        
+                        // Switch immediately to main workspace if everything is okay
+                        if (document.getElementById('editDashboard').style.display !== 'flex') {
+                            showView('editDashboard');
+                            appendLog("System ready. Connected to local agent successfully.", 'success');
+                        }
+                        
+                        // If backend job was running, resume polling
+                        if (data.job_status === 'running' && !isJobRunning) {
+                            logOffset = 0;
+                            clearTerminal();
+                            appendLog("Connecting to active rendering job in background...", 'info');
+                            isJobRunning = true;
+                            document.getElementById('startBtn').setAttribute('disabled', 'true');
+                            document.getElementById('cancelBtn').removeAttribute('disabled');
+                            startStatusPolling();
+                        }
+                        return;
+                    }
+                }
+            } catch (err) {}
+            
+            // If check failed and we were in the editor, prompt back to wizard
+            if (document.getElementById('editDashboard').style.display === 'flex') {
+                isConnected = false;
+                cancelRenderJobLocalState();
+                showView('setupWizard');
+                performVerification(); // Populate checklist errors
+            } else if (document.getElementById('loadingView').style.display === 'flex') {
+                // Initial load: show the checklist
+                showView('setupWizard');
+                performVerification();
+            }
+        }
+
+        // Checklist Manual / Detailed Verification
+        async function performVerification() {
+            const chkAgent = document.getElementById('chkAgent');
+            const chkFfmpeg = document.getElementById('chkFfmpeg');
+            const chkFfprobe = document.getElementById('chkFfprobe');
+            const errBox = document.getElementById('wizardErrorMsg');
+            
+            chkAgent.className = 'status-pill fail'; chkAgent.innerText = 'Checking...';
+            chkFfmpeg.className = 'status-pill fail'; chkFfmpeg.innerText = 'Checking...';
+            chkFfprobe.className = 'status-pill fail'; chkFfprobe.innerText = 'Checking...';
+            errBox.style.display = 'none';
+
+            try {
+                const response = await fetch(`${AGENT_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
                     
-                    // If the server tells us a job is running, but we are not polling, start polling
-                    if (data.job_status === 'running' && !isJobRunning) {
-                        logOffset = 0;
-                        clearTerminal();
-                        appendLog("Connecting to already running background job...", 'info');
-                        startStatusPolling();
+                    // Agent Server is Online
+                    chkAgent.className = 'status-pill pass';
+                    chkAgent.innerText = 'Online';
+                    
+                    // Check FFmpeg
+                    if (data.ffmpeg) {
+                        chkFfmpeg.className = 'status-pill pass';
+                        chkFfmpeg.innerText = 'Detected';
+                    } else {
+                        chkFfmpeg.className = 'status-pill fail';
+                        chkFfmpeg.innerText = 'Not Found';
+                    }
+
+                    // Check FFprobe
+                    if (data.ffprobe) {
+                        chkFfprobe.className = 'status-pill pass';
+                        chkFfprobe.innerText = 'Detected';
+                    } else {
+                        chkFfprobe.className = 'status-pill fail';
+                        chkFfprobe.innerText = 'Not Found';
+                    }
+
+                    // Show detailed error description if binaries are missing
+                    if (!data.ffmpeg || !data.ffprobe) {
+                        errBox.style.display = 'block';
+                        errBox.innerHTML = `⚠️ <strong>FFmpeg missing:</strong> Local Agent is online, but FFmpeg/FFprobe binaries were not found in your system's <code>PATH</code> variable.<br>Please install FFmpeg, add it to your system PATH, and restart the <strong>local_agent.py</strong> script.`;
+                    } else {
+                        // Success transition
+                        isConnected = true;
+                        setTimeout(() => {
+                            showView('editDashboard');
+                            appendLog("Setup completed successfully. Ready to render!", 'success');
+                        }, 800);
                     }
                 } else {
-                    setConnected(false);
+                    throw new Error("HTTP error");
                 }
             } catch (err) {
-                setConnected(false);
+                chkAgent.className = 'status-pill fail'; chkAgent.innerText = 'Offline';
+                chkFfmpeg.className = 'status-pill fail'; chkFfmpeg.innerText = 'Offline';
+                chkFfprobe.className = 'status-pill fail'; chkFfprobe.innerText = 'Offline';
+                
+                errBox.style.display = 'block';
+                errBox.innerHTML = `⚠️ <strong>Agent Offline:</strong> Local Python agent is not running on <code>http://127.0.0.1:8765</code>.<br>Please ensure Python dependencies are installed and you have started the script with: <code>python local_agent.py</code>`;
             }
         }
 
-        function setConnected(status) {
-            isConnected = status;
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            const offlineAlert = document.getElementById('offlineAlert');
-            const startBtn = document.getElementById('startBtn');
-
-            if (isConnected) {
-                statusDot.className = 'status-dot connected';
-                statusText.innerText = 'Agent Online';
-                offlineAlert.style.display = 'none';
-                if (!isJobRunning) {
-                    startBtn.removeAttribute('disabled');
-                }
-            } else {
-                statusDot.className = 'status-dot disconnected';
-                statusText.innerText = 'Agent Offline';
-                offlineAlert.style.display = 'block';
-                startBtn.setAttribute('disabled', 'true');
-                cancelRenderJobLocalState();
-            }
-        }
-
-        // Native Picker Integrations
+        // Native File Selectors
         async function browseFile(fileType, inputId) {
             if (!isConnected) return;
             try {
@@ -696,7 +990,7 @@
                     }
                 }
             } catch (err) {
-                appendLog(`Error picking file: ${err.message}`, 'error');
+                appendLog(`Error selecting file: ${err.message}`, 'error');
             }
         }
 
@@ -711,11 +1005,11 @@
                     }
                 }
             } catch (err) {
-                appendLog(`Error picking folder: ${err.message}`, 'error');
+                appendLog(`Error selecting output folder: ${err.message}`, 'error');
             }
         }
 
-        // Start Rendering
+        // Job controls
         async function startRenderJob() {
             if (!isConnected || isJobRunning) return;
 
@@ -726,17 +1020,16 @@
             const work_mode = document.getElementById('workMode').value;
             const normalize_output = document.getElementById('normalizeOutput').checked;
 
-            // Simple validation
             if (!video_path) {
-                alert("Please select a main source video file.");
+                alert("Please select the source video.");
                 return;
             }
             if (!output_dir) {
-                alert("Please select a final output directory.");
+                alert("Please select the output folder.");
                 return;
             }
             if ((work_mode === 'clips' || work_mode === 'remove_ranges') && !csv_path) {
-                alert("Please select a script CSV file.");
+                alert("Please select the CSV file.");
                 return;
             }
 
@@ -760,7 +1053,7 @@
                     isJobRunning = true;
                     logOffset = 0;
                     clearTerminal();
-                    appendLog("Job request sent successfully. Initializing FFmpeg render engine...", 'info');
+                    appendLog("Job request sent. Initiating FFmpeg engine...", 'info');
                     
                     document.getElementById('startBtn').setAttribute('disabled', 'true');
                     document.getElementById('cancelBtn').removeAttribute('disabled');
@@ -768,21 +1061,20 @@
                     startStatusPolling();
                 } else {
                     const err = await response.json();
-                    appendLog(`Failed to start job: ${err.detail || 'Unknown error'}`, 'error');
+                    appendLog(`Failed to start render: ${err.detail || 'Unknown error'}`, 'error');
                 }
             } catch (err) {
-                appendLog(`Network error starting job: ${err.message}`, 'error');
+                appendLog(`Network error starting render: ${err.message}`, 'error');
             }
         }
 
-        // Cancel Job
         async function cancelRenderJob() {
             if (!isConnected) return;
-            appendLog("Sending cancellation request to agent...", 'info');
+            appendLog("Requesting cancellation from agent...", 'info');
             try {
                 await fetch(`${AGENT_URL}/cancel-job`, { method: 'POST' });
             } catch (err) {
-                appendLog(`Error sending cancel request: ${err.message}`, 'error');
+                appendLog(`Error cancelling job: ${err.message}`, 'error');
             }
         }
 
@@ -793,12 +1085,9 @@
             }
             isJobRunning = false;
             document.getElementById('cancelBtn').setAttribute('disabled', 'true');
-            if (isConnected) {
-                document.getElementById('startBtn').removeAttribute('disabled');
-            }
+            document.getElementById('startBtn').removeAttribute('disabled');
         }
 
-        // Status Polling Loop
         function startStatusPolling() {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(pollJobStatus, 1000);
@@ -809,36 +1098,32 @@
                 const response = await fetch(`${AGENT_URL}/job-status?offset=${logOffset}`);
                 if (!response.ok) {
                     cancelRenderJobLocalState();
-                    appendLog("Failed to fetch status from local agent.", "error");
+                    appendLog("Failed to sync with local agent status.", "error");
                     return;
                 }
 
                 const data = await response.json();
                 
-                // Append logs
                 if (data.new_logs && data.new_logs.length > 0) {
                     data.new_logs.forEach(log => {
                         let type = 'normal';
                         if (log.startsWith('ERROR:')) type = 'error';
                         else if (log.startsWith('Done.') || log.includes('finished successfully')) type = 'success';
                         else if (log.startsWith('-----') || log.includes('Started')) type = 'info';
-                        
                         appendLog(log, type);
                     });
                 }
                 logOffset = data.next_offset;
 
-                // Update Progress bar
                 if (data.total > 0) {
                     const pct = Math.round((data.progress / data.total) * 100);
-                    updateProgressBar(pct, `Processing clip: ${data.progress} / ${data.total}`);
+                    updateProgressBar(pct, `Progress: ${data.progress} / ${data.total}`);
                 } else {
                     if (data.status === 'running') {
                         updateProgressBar(0, "Analyzing streams...");
                     }
                 }
 
-                // Check termination states
                 if (data.status !== 'running') {
                     clearInterval(pollInterval);
                     pollInterval = null;
@@ -861,11 +1146,11 @@
                     }
                 }
             } catch (err) {
-                console.error("Polling error:", err);
+                console.error("Status check failed:", err);
             }
         }
 
-        // DOM Update Helpers
+        // GUI Helpers
         function updateProgressBar(percent, label) {
             document.getElementById('progressBar').style.width = `${percent}%`;
             document.getElementById('progressPercent').innerText = `${percent}%`;
@@ -882,7 +1167,6 @@
             else if (type === 'info') span.className = 'log-info';
 
             terminal.appendChild(span);
-            // Auto scroll to bottom
             terminal.scrollTop = terminal.scrollHeight;
         }
 

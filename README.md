@@ -2,7 +2,24 @@
 
 A multi-interface video automation application built with Python, PySide6, FastAPI, and FFmpeg. The project supports two modes of operation:
 1. **Standalone Desktop GUI Application**: Runs entirely as a local desktop window.
-2. **Web UI + Local Agent Service**: Access a hosted or local web dashboard in your browser while a background local agent handles FFmpeg operations and file dialogue requests natively on your PC.
+2. **Web UI + Local Agent Service (Option 2)**: Access a hosted or local web dashboard in your browser while a background local agent handles FFmpeg operations and file dialogue requests natively on your PC.
+
+---
+
+## Onboarding Setup Wizard Flow
+
+When a user visits the hosted video editing website:
+
+1. **Auto-check**: The Web UI automatically attempts to establish a background connection with the Local Agent on `http://127.0.0.1:8765/health`.
+2. **Automatic Redirect**: If the Local Agent is active and both **FFmpeg** and **FFprobe** are detected in the system's PATH, the Setup Wizard is bypassed and the user is redirected straight to the **Video Editing Dashboard** in 1.5 seconds.
+3. **Onboarding Guidance**: If the agent is offline or dependencies are missing, the UI presents an interactive **Setup Wizard**:
+   - Instructions on how to download/install Python and FFmpeg.
+   - Script run commands to start the local agent.
+   - An interactive **Verification Checklist** checking for:
+     - `Local Agent Status` (Online/Offline)
+     - `FFmpeg Binary` (Detected/Missing)
+     - `FFprobe Binary` (Detected/Missing)
+   - A **"Verify & Start Editing"** check button that runs real-time diagnostic checks and redirects immediately upon success.
 
 ---
 
@@ -20,12 +37,6 @@ A multi-interface video automation application built with Python, PySide6, FastA
         ▼
 [ Final Output Folder ]
 ```
-
-### Key Modules:
-- `render_engine.py`: The core video-processing library containing the FFmpeg/FFprobe logic (split clips, cut silences, remove black screens, stitch clips).
-- `video_agent_app.py`: Standalone desktop PySide6 GUI wrapper.
-- `local_agent.py`: A native PySide6 app that starts a background FastAPI web server on port `8765`. It handles API requests from the browser (Web UI) and triggers native OS file dialogs when requested.
-- `web_ui/index.html`: The web dashboard frontend. Features glassmorphism UI, a real-time console log stream, progress bars, and status updates.
 
 ---
 
@@ -91,49 +102,17 @@ If you want to use the classic PySide6 desktop interface directly:
 python video_agent_app.py
 ```
 
-### Option 2: Web UI + Local Agent (Recommended)
-This splits the interface into a modern browser-based web dashboard and a local engine service:
-
+### Option 2: Web UI + Local Agent (Recommended Setup)
 1. **Launch the Local Agent:**
    ```bash
    python local_agent.py
    ```
-   This will open a small agent window showing the server status and logs. The FastAPI server starts in the background on `http://127.0.0.1:8765`.
+   This opens a small agent window showing the server status and logs. The FastAPI server starts in the background on `http://127.0.0.1:8765`.
 
 2. **Open the Web UI:**
    - Click the **"Open Web UI"** button directly on the agent's desktop window.
-   - Alternatively, open `web_ui/index.html` in any web browser or visit `http://127.0.0.1:8765/` directly.
+   - Or open `web_ui/index.html` in any web browser or visit `http://127.0.0.1:8765/` directly.
+   - If hosted, visit the hosted URL (the website will run the setup checks automatically).
 
 3. **Start rendering:**
-   - The Web UI will automatically detect the local agent.
-   - Click the **"Browse"** buttons in the browser. This will trigger native file/folder pickers on your desktop to retrieve the absolute paths.
    - Select your CSV, source video, options, and click **"Start Render"**. Progress and logs will stream in real-time on your browser dashboard.
-
----
-
-## CSV File Schema Format
-
-For CSV-driven modes, construct your CSV with the following headers:
-
-| Headers (Any of the following) | Description |
-| :--- | :--- |
-| `ID` / `No` / `Serial` | Unique identifier for each clip |
-| `Final title` / `Title` / `Name` | Output filename of the clip |
-| `Source time range` / `Time range` / `Range` | Timestamp range to keep or cut (e.g. `00:01:20 - 00:02:10`) |
-
-### Example
-```csv
-ID,Title,Time range
-1,Intro,00:00:00 - 00:01:30
-2,Deep Dive,00:01:30 - 00:08:45
-```
-
----
-
-## Agent Process Modes
-
-- **Create many short clips from CSV ranges**: Splices the video into individual files per row.
-- **Remove CSV ranges**: Cuts the timestamp ranges out, stitching the remaining content.
-- **Auto remove black screen parts**: Automatically finds and deletes black screen intervals.
-- **Auto remove silent parts**: Automatically scans the audio, finds silences, and removes them.
-- **Auto remove black and silent parts**: Performs both checks and yields a polished, continuous video.

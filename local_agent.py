@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
 )
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
@@ -50,7 +50,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def add_private_network_headers(request: Request, call_next):
+    if request.method == "OPTIONS":
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
+        return response
+    
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Private-Network"] = "true"
+    return response
+
 class JobConfig(BaseModel):
+
     csv_path: Optional[str] = None
     video_path: str
     outro_path: Optional[str] = None
@@ -66,11 +81,17 @@ signaler = AgentSignaler()
 
 @app.get("/health")
 def health_check():
+    import shutil
+    ffmpeg_found = shutil.which("ffmpeg") is not None
+    ffprobe_found = shutil.which("ffprobe") is not None
     return {
         "status": "ok",
         "app": "smart-video-agent-local-service",
+        "ffmpeg": ffmpeg_found,
+        "ffprobe": ffprobe_found,
         "job_status": job_state["status"]
     }
+
 
 @app.post("/choose-file")
 def choose_file(file_type: str = Query("all", description="Type of file: 'csv', 'video', or 'outro'")):
