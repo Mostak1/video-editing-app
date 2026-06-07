@@ -1,2 +1,4 @@
 PySide6
 pandas
+fastapi
+uvicorn

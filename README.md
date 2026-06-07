@@ -1,30 +1,50 @@
 # Smart Video Clip Agent
 
-A desktop GUI application built with PySide6 and FFmpeg to automate video editing tasks. The application can split a long video into multiple clips based on CSV timestamp ranges, cut out silent or black screen sections automatically, combine clips, or append outro templates.
+A multi-interface video automation application built with Python, PySide6, FastAPI, and FFmpeg. The project supports two modes of operation:
+1. **Standalone Desktop GUI Application**: Runs entirely as a local desktop window.
+2. **Web UI + Local Agent Service**: Access a hosted or local web dashboard in your browser while a background local agent handles FFmpeg operations and file dialogue requests natively on your PC.
+
+---
+
+## Architecture Overview
+
+```
+[ Web UI Dashboard ] (Browser)
+        │
+        ▼ (HTTP / CORS)
+[ Local Agent Service ] (Runs on local PC: http://127.0.0.1:8765)
+        │
+        ▼ (Subprocess calls)
+[ Local FFmpeg Engine ]
+        │
+        ▼
+[ Final Output Folder ]
+```
+
+### Key Modules:
+- `render_engine.py`: The core video-processing library containing the FFmpeg/FFprobe logic (split clips, cut silences, remove black screens, stitch clips).
+- `video_agent_app.py`: Standalone desktop PySide6 GUI wrapper.
+- `local_agent.py`: A native PySide6 app that starts a background FastAPI web server on port `8765`. It handles API requests from the browser (Web UI) and triggers native OS file dialogs when requested.
+- `web_ui/index.html`: The web dashboard frontend. Features glassmorphism UI, a real-time console log stream, progress bars, and status updates.
 
 ---
 
 ## Prerequisites
 
-Before running the application, make sure you have the following installed on your system:
+Before running either interface, make sure you have the following installed:
 
 1. **Python 3.9+**
-2. **FFmpeg & FFprobe** (must be added to your system's PATH environment variable)
+2. **FFmpeg & FFprobe** (must be available in your system's PATH)
 
-### How to Install FFmpeg on Any PC
+### Installing FFmpeg
 
 #### 🔹 Windows
-1. Download the latest release from [Gyan.dev](https://www.gyan.dev/ffmpeg/builds/) (choose `ffmpeg-git-essentials.7z`).
-2. Extract the downloaded archive (e.g., to `C:\ffmpeg`).
-3. Add the `bin` folder (e.g., `C:\ffmpeg\bin`) to your system environment variables PATH:
-   * Press `Win + R`, type `sysdm.cpl`, and hit Enter.
-   * Go to **Advanced** tab > **Environment Variables**.
-   * Under **System variables**, select **Path** and click **Edit**.
-   * Click **New** and paste the path to your extracted `bin` folder.
-   * Click **OK** to save and restart your terminal.
+1. Download the build package from [Gyan.dev](https://www.gyan.dev/ffmpeg/builds/) (`ffmpeg-git-essentials.7z`).
+2. Extract the files (e.g., to `C:\ffmpeg`).
+3. Add `C:\ffmpeg\bin` to your system environment variables PATH.
+4. Restart your terminal.
 
 #### 🔹 macOS
-Using [Homebrew](https://brew.sh/):
 ```bash
 brew install ffmpeg
 ```
@@ -37,71 +57,83 @@ sudo apt install ffmpeg
 
 ---
 
-## Setup & Running the Application
+## Installation & Setup
 
-Follow these steps to run the application on your computer:
+1. **Navigate to the project directory:**
+   ```bash
+   cd /var/www/html/smart-video-agent
+   ```
 
-### Step 1: Clone or navigate to the project folder
-Open your terminal (or Command Prompt / PowerShell on Windows) and run:
-```bash
-cd path/to/smart-video-agent
-```
+2. **Create and activate a virtual environment:**
+   * **Windows:**
+     ```powershell
+     python -m venv .venv
+     .venv\Scripts\activate
+     ```
+   * **macOS / Linux:**
+     ```bash
+     python3 -m venv .venv
+     source .venv/bin/activate
+     ```
 
-### Step 2: Create a virtual environment (Recommended)
-This keeps dependencies isolated for the project.
+3. **Install the dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-* **On Windows (PowerShell / Command Prompt):**
-  ```powershell
-  python -m venv .venv
-  .venv\Scripts\activate
-  ```
+---
 
-* **On macOS / Linux:**
-  ```bash
-  python3 -m venv .venv
-  source .venv/bin/activate
-  ```
+## How to Run
 
-### Step 3: Install dependencies
-Install the required Python packages:
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-### Step 4: Run the Application
-Start the graphical interface:
+### Option 1: Standalone Desktop GUI
+If you want to use the classic PySide6 desktop interface directly:
 ```bash
 python video_agent_app.py
 ```
+
+### Option 2: Web UI + Local Agent (Recommended)
+This splits the interface into a modern browser-based web dashboard and a local engine service:
+
+1. **Launch the Local Agent:**
+   ```bash
+   python local_agent.py
+   ```
+   This will open a small agent window showing the server status and logs. The FastAPI server starts in the background on `http://127.0.0.1:8765`.
+
+2. **Open the Web UI:**
+   - Click the **"Open Web UI"** button directly on the agent's desktop window.
+   - Alternatively, open `web_ui/index.html` in any web browser or visit `http://127.0.0.1:8765/` directly.
+
+3. **Start rendering:**
+   - The Web UI will automatically detect the local agent.
+   - Click the **"Browse"** buttons in the browser. This will trigger native file/folder pickers on your desktop to retrieve the absolute paths.
+   - Select your CSV, source video, options, and click **"Start Render"**. Progress and logs will stream in real-time on your browser dashboard.
 
 ---
 
 ## CSV File Schema Format
 
-When using CSV mode, the file must be comma-separated (`.csv`) and contain the following column headers (case-insensitive):
+For CSV-driven modes, construct your CSV with the following headers:
 
-| Column Headers (Use one of each group) | Example Values | Description |
-| :--- | :--- | :--- |
-| `ID` / `No` / `Serial` | `1`, `clip_01` | Unique identifier for the clip |
-| `Final title` / `Title` / `Name` | `Introduction to PySide6` | Name of the output video clip |
-| `Source time range` / `Time range` / `Range` | `00:01:12 - 00:02:05` | Timestamp range to keep or cut |
+| Headers (Any of the following) | Description |
+| :--- | :--- |
+| `ID` / `No` / `Serial` | Unique identifier for each clip |
+| `Final title` / `Title` / `Name` | Output filename of the clip |
+| `Source time range` / `Time range` / `Range` | Timestamp range to keep or cut (e.g. `00:01:20 - 00:02:10`) |
 
-### Example CSV Content
+### Example
 ```csv
 ID,Title,Time range
-1,Intro Scene,00:00:00 - 00:01:30
-2,Code Walkthrough,00:01:30 - 00:10:45
-3,Outro & Summary,00:10:45 - 00:12:00
+1,Intro,00:00:00 - 00:01:30
+2,Deep Dive,00:01:30 - 00:08:45
 ```
 
 ---
 
-## Agent Modes
+## Agent Process Modes
 
-* **Create many short clips from CSV ranges**: Splits the source video into separate video files for each row defined in the CSV.
-* **Remove CSV ranges and create one polished video**: Cuts out the listed CSV time ranges and stitches the remaining parts together into a single polished output video.
-* **Auto remove black screen parts**: Automatically detects black screens in the source video and cuts them out.
-* **Auto remove silent parts**: Automatically scans the video's audio track, finds silences, and removes them.
-* **Auto remove black and silent parts**: Performs both checks and yields a polished, continuous video without silence or blank screens.
-# video-editing-app
+- **Create many short clips from CSV ranges**: Splices the video into individual files per row.
+- **Remove CSV ranges**: Cuts the timestamp ranges out, stitching the remaining content.
+- **Auto remove black screen parts**: Automatically finds and deletes black screen intervals.
+- **Auto remove silent parts**: Automatically scans the audio, finds silences, and removes them.
+- **Auto remove black and silent parts**: Performs both checks and yields a polished, continuous video.
