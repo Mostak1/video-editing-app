@@ -661,18 +661,18 @@
                     <div class="step-content">
                         <h3>Download the Local Agent Package</h3>
                         <p style="margin-bottom: 12px;">
-                            Download the local processing files directly from our server. Extract the ZIP file into any folder on your Windows PC.
+                            Download the local processing files directly from our server. Extract the ZIP file into any folder on your PC.
                         </p>
-                        <a href="agent.zip" download class="btn-browse" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px;">
+                        <a id="downloadAgentBtn" href="agent_windows.zip" download class="btn-browse" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Download Local Agent (.zip)
+                            <span id="downloadBtnText">Download Local Agent (.zip)</span>
                         </a>
                     </div>
                 </div>
 
                 <div class="step-item">
                     <div class="step-badge">2</div>
-                    <div class="step-content">
+                    <div id="setupStep2" class="step-content">
                         <h3>Run the Auto Setup</h3>
                         <p>
                             Open the extracted folder on your PC and double-click <code>setup_windows.bat</code>.<br>
@@ -845,6 +845,9 @@
         let healthTimer = null;
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Customize steps dynamically based on OS
+            detectOSAndCustomizeWizard();
+
             // Initial auto-verification check
             autoVerify();
             
@@ -852,6 +855,43 @@
             healthTimer = setInterval(autoVerify, 3000);
             toggleModeGroup();
         });
+
+        function detectOSAndCustomizeWizard() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const setupStep2 = document.getElementById('setupStep2');
+            const downloadAgentBtn = document.getElementById('downloadAgentBtn');
+            const downloadBtnText = document.getElementById('downloadBtnText');
+            
+            let isWindows = true;
+            if (userAgent.includes('mac') || userAgent.includes('darwin')) {
+                isWindows = false;
+            } else if (userAgent.includes('linux')) {
+                isWindows = false;
+            }
+
+            if (isWindows) {
+                downloadAgentBtn.href = "agent_windows.zip";
+                downloadBtnText.innerText = "Download Windows Agent (.zip)";
+                setupStep2.innerHTML = `
+                    <h3>Run the Auto Setup</h3>
+                    <p>
+                        Open the extracted folder on your PC and double-click <code>setup_windows.bat</code>.<br>
+                        It will automatically install Python, configure FFmpeg, and start the local agent for you.
+                    </p>
+                `;
+            } else {
+                downloadAgentBtn.href = "agent_unix.zip";
+                downloadBtnText.innerText = "Download macOS/Linux Agent (.zip)";
+                setupStep2.innerHTML = `
+                    <h3>Run the Auto Setup</h3>
+                    <p>
+                        Open your terminal in the extracted folder on your PC and run:<br>
+                        <code>chmod +x setup_unix.sh && ./setup_unix.sh</code><br>
+                        It will automatically verify Python 3, install FFmpeg, and start the local agent for you.
+                    </p>
+                `;
+            }
+        }
 
         // Toggle CSV Picker UI
         function toggleModeGroup() {
