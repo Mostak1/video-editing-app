@@ -916,11 +916,13 @@
 
         // Auto Verification (Runs quietly in background)
         async function autoVerify() {
+            let healthy = false;
             try {
                 const response = await fetch(`${AGENT_URL}/health`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.status === 'ok' && data.ffmpeg && data.ffprobe) {
+                        healthy = true;
                         isConnected = true;
                         
                         // Switch immediately to main workspace if everything is okay
@@ -939,21 +941,22 @@
                             document.getElementById('cancelBtn').removeAttribute('disabled');
                             startStatusPolling();
                         }
-                        return;
                     }
                 }
             } catch (err) {}
             
-            // If check failed and we were in the editor, prompt back to wizard
-            if (document.getElementById('editDashboard').style.display === 'flex') {
-                isConnected = false;
-                cancelRenderJobLocalState();
-                showView('setupWizard');
-                performVerification(); // Populate checklist errors
-            } else if (document.getElementById('loadingView').style.display === 'flex') {
-                // Initial load: show the checklist
-                showView('setupWizard');
-                performVerification();
+            if (!healthy) {
+                // If check failed and we were in the editor, prompt back to wizard
+                if (document.getElementById('editDashboard').style.display === 'flex') {
+                    isConnected = false;
+                    cancelRenderJobLocalState();
+                    showView('setupWizard');
+                    performVerification(); // Populate checklist errors
+                } else if (document.getElementById('setupWizard').style.display !== 'flex') {
+                    // Initial load or transition: show the checklist
+                    showView('setupWizard');
+                    performVerification();
+                }
             }
         }
 
