@@ -104,3 +104,4 @@ ID,Title,Time range
 * **Auto remove black screen parts**: Automatically detects black screens in the source video and cuts them out.
 * **Auto remove silent parts**: Automatically scans the video's audio track, finds silences, and removes them.
 * **Auto remove black and silent parts**: Performs both checks and yields a polished, continuous video without silence or blank screens.
+# video-editing-app
