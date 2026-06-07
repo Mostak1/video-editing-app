@@ -659,26 +659,29 @@
                 <div class="step-item">
                     <div class="step-badge">1</div>
                     <div class="step-content">
-                        <h3>Install Python & FFmpeg</h3>
-                        <p>
-                            Download and install <a href="https://www.python.org/downloads/" target="_blank" style="color:var(--accent-primary);">Python 3.9+</a> (remember to check "Add Python to PATH"). <br>
-                            Install <a href="https://ffmpeg.org/download.html" target="_blank" style="color:var(--accent-primary);">FFmpeg</a> and verify it is added to your environment <code>PATH</code> variable.
+                        <h3>Download the Local Agent Package</h3>
+                        <p style="margin-bottom: 12px;">
+                            Download the local processing files directly from our server. Extract the ZIP file into any folder on your Windows PC.
                         </p>
+                        <a href="agent.zip" download class="btn-browse" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download Local Agent (.zip)
+                        </a>
                     </div>
                 </div>
 
                 <div class="step-item">
                     <div class="step-badge">2</div>
                     <div class="step-content">
-                        <h3>Run the Local Agent</h3>
+                        <h3>Run the Auto Setup</h3>
                         <p>
-                            Open your project directory on your PC and run: <br>
-                            <code>pip install -r requirements.txt</code><br>
-                            <code>python local_agent.py</code>
+                            Open the extracted folder on your PC and double-click <code>setup_windows.bat</code>.<br>
+                            It will automatically install Python, configure FFmpeg, and start the local agent for you.
                         </p>
                     </div>
                 </div>
             </div>
+
 
             <!-- Real-Time Verification Checklist -->
             <div class="checklist-panel">
